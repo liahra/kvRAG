@@ -4,8 +4,6 @@ def get_embedding_function():
     embeddings = OllamaEmbeddings(model="nomic-embed-text")
     return embeddings
 
-
-
 # TESTER 
 # embedding_function = get_embedding_function()
 # # Check if the returned object is an instance of OllamaEmbeddings

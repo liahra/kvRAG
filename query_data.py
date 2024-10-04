@@ -8,25 +8,14 @@ from get_embedding_function import get_embedding_function
 CHROMA_PATH = "chroma"
 
 PROMPT_TEMPLATE = """
-Answer the question based only on the following context:
+Svar på spørsmålet basert kun på følgende kontekst og bruk norsk språk:
 
 {context}
 
 ---
 
-Answer the question based on the above context: {question}
+Svar på spørsmålet ovenfor på norsk. Gi et detaljert svar og forklaring: {question}
 """
-
-# PROMPT_TEMPLATE = """
-# Svar alltid på norsk.
-# Svar på spørsmålet basert kun på følgende kontekst:
-
-# {context}
-
-# ---
-
-# Svar på spørsmålet basert på konteksten ovenfor: {question}
-# """
 
 
 def main():
