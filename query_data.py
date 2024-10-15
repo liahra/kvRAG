@@ -19,60 +19,109 @@ Svar på spørsmålet ovenfor på norsk. Gi et detaljert svar og forklaring: {qu
 
 # Funksjon som tar én parameter query_text, som er en streng.
 # Representerer spørsmålet eller forespørselen brukeren vil stille.
-def query_rag(message, history=None):
+# def query_rag(message, history=None):
     # Initialiser historikk hvis den ikke er satt
-    history = history or []
+    # history = history or []
     
     # Forebereder databasen.
-    embedding_function = get_embedding_function()  # Konverterer tekst til vektor.
-    db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
+    # embedding_function = get_embedding_function()  # Konverterer tekst til vektor.
+    # db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
 
     # Søker i databasen.
-    results = db.similarity_search_with_score(message, k=3)
+    # results = db.similarity_search_with_score(message, k=3)
 
     # Kombinerer innholdet fra de returnerte dokumentene til en enkelt kontekststreng.
-    context_text = "\n\n---\n\n".join([doc.page_content for doc, _score in results])
-    prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
+    # context_text = "\n\n---\n\n".join([doc.page_content for doc, _score in results])
+    # prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
 
     # Forbereder tekst som sendes til språkmodellen
-    prompt = prompt_template.format(context=context_text, question=message)
+    # prompt = prompt_template.format(context=context_text, question=message)
 
     # Kjør spørsmålet gjennom modellen
-    model = Ollama(model="llama3.2")
-    response_text = model.invoke(prompt)
+    # model = Ollama(model="llama3.2")
+    # response_text = model.invoke(prompt)
 
     # Hent kilder fra de returnerte dokumentene
-    sources = [doc.metadata.get("id", None) for doc, _score in results]
-    formatted_response = f"{response_text}\n\nKilder:\n" + "\n".join([f"- {source}" for source in sources if source])
+    # sources = [doc.metadata.get("id", None) for doc, _score in results]
+    # formatted_response = f"{response_text}\n\nKilder:\n" + "\n".join([f"- {source}" for source in sources if source])
 
     # Legg til spørsmålet og svaret i historikken
-    history.append((message, formatted_response))
+    # history.append((message, formatted_response))
 
     # Returner historikken for chatbot og oppdatert state
-    return history, history  # Én for chatbot og én for state
+    # return history, history  # Én for chatbot og én for state
 
 # Gradio UI
-with gr.Blocks() as demo:
+# with gr.Blocks() as demo:
     # Legg til en tittel og beskrivelse
-    gr.Markdown("# RAG-søk for produktspesifikasjoner")
-    gr.Markdown("Skriv inn et spørsmål eller forespørsel, og modellen vil gi et detaljert svar basert på kontekst.")
+    # gr.Markdown("# RAG-søk for produktspesifikasjoner")
+    # gr.Markdown("Skriv inn et spørsmål eller forespørsel, og modellen vil gi et detaljert svar basert på kontekst.")
     
     # Chatbot-komponent for chat-lignende UI
-    chatbot = gr.Chatbot()
+    # chatbot = gr.Chatbot()
     
     # Input-felt for spørsmål
-    query_text = gr.Textbox(label="Skriv ditt spørsmål her", placeholder="Hva består arter av nasjonal forvaltningsinteresse av?")
+    # query_text = gr.Textbox(label="Skriv ditt spørsmål her", placeholder="Hva består arter av nasjonal forvaltningsinteresse av?")
     
     # Knapp for å sende inn og klarere spørsmål
-    submit_btn = gr.Button("Send inn")
-    clear_btn = gr.Button("Tøm")
+    # submit_btn = gr.Button("Send inn")
+    # clear_btn = gr.Button("Tøm")
 
     # Skjult tilstand for å holde samtalehistorikk
-    state = gr.State([])  # Initialiserer med en tom liste for historikk
+    # state = gr.State([])  # Initialiserer med en tom liste for historikk
 
     # Handlinger for knappene
-    submit_btn.click(fn=query_rag, inputs=[query_text, state], outputs=[chatbot, state])
-    clear_btn.click(lambda: [], None, chatbot)  # Nullstiller chatten
+    # submit_btn.click(fn=query_rag, inputs=[query_text, state], outputs=[chatbot, state])
+    # clear_btn.click(lambda: [], None, chatbot)  # Nullstiller chatten
+
+# if __name__ == "__main__":
+#     demo.launch()
+
+class RagSearchApp:
+    def __init__(self):
+        # Initialiserer Gradio UI-komponenter
+        self.demo = gr.Blocks()
+        self.chatbot = None
+        self.query_text = None
+        self.submit_btn = None
+        self.clear_btn = None
+        self.state = None
+        
+        self.build_ui()  # Bygger brukergrensesnittet
+
+    def query_rag(self, message, history=None):
+        # Samme funksjonalitet som du allerede har implementert
+        history = history or []
+        embedding_function = get_embedding_function()
+        db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
+        results = db.similarity_search_with_score(message, k=3)
+        context_text = "\n\n---\n\n".join([doc.page_content for doc, _score in results])
+        prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
+        prompt = prompt_template.format(context=context_text, question=message)
+        model = Ollama(model="llama3.2")
+        response_text = model.invoke(prompt)
+        sources = [doc.metadata.get("id", None) for doc, _score in results]
+        formatted_response = f"{response_text}\n\nKilder:\n" + "\n".join([f"- {source}" for source in sources if source])
+        history.append((message, formatted_response))
+        return history, history
+
+    def build_ui(self):
+        # Bygger UI-komponenter
+        with self.demo:
+            gr.Markdown("# RAG-søk for produktspesifikasjoner")
+            gr.Markdown("Skriv inn et spørsmål eller forespørsel, og modellen vil gi et detaljert svar basert på kontekst.")
+            self.chatbot = gr.Chatbot()
+            self.query_text = gr.Textbox(label="Skriv ditt spørsmål her", placeholder="Hva består arter av nasjonal forvaltningsinteresse av?")
+            self.submit_btn = gr.Button("Send inn")
+            self.clear_btn = gr.Button("Tøm")
+            self.state = gr.State([])  # Initialiserer med en tom liste for historikk
+            self.submit_btn.click(fn=self.query_rag, inputs=[self.query_text, self.state], outputs=[self.chatbot, self.state])
+            self.clear_btn.click(lambda: [], None, self.chatbot)
+
+    def launch(self):
+        # Starter Gradio-applikasjonen
+        self.demo.launch()
 
 if __name__ == "__main__":
-    demo.launch()
+    app = RagSearchApp()  # Opprett en instans av klassen
+    app.launch()  # Start applikasjonen
